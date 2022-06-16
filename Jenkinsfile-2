@@ -4,9 +4,9 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
   environment {
-    DOCKER_HUB_CREDS = credentials('darinpope-docker-hub')
-    AWS_CREDS = credentials('darinpope-aws-creds')
-    KEYCHAIN_PASSWORD = credentials('darinpope-keychain')
+    DOCKER_HUB_CREDS = credentials('docker')
+    AWS_CREDS = credentials('dex-aws')
+    KEYCHAIN_PASSWORD = credentials('macos-pass')
   }
   stages {
     stage('Tooling versions') {
@@ -31,6 +31,7 @@ pipeline {
     }
     stage('Deploy') {
       steps {
+        sh 'docker context create ecs myecscontext --from-env'
         sh 'docker context use myecscontext'
         sh 'docker compose up'
         sh 'docker compose ps --format json'

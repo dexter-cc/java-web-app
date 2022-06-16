@@ -1,21 +1,19 @@
-FROM adoptopenjdk/openjdk11:alpine-slim as build
-WORKDIR /workspace/app
+FROM node:14
 
-ARG PORT
-ENV PORT ${PORT}
+# Setting working directory. All the path will be relative to WORKDIR
+WORKDIR /usr/src/app
 
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-COPY src src
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
 
-RUN ./mvnw install -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+RUN npm install
+# If you are building your code for production
+# RUN npm ci --only=production
 
-FROM adoptopenjdk/openjdk11:alpine-slim
-VOLUME /tmp
-ARG DEPENDENCY=/workspace/app/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.example.demo.DemoApplication"]
+# Bundle app source
+COPY . .
+
+EXPOSE 3000
+CMD [ "node", "index.js" ]

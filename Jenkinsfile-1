@@ -1,7 +1,6 @@
 pipeline {
-  agent { label 'macos' }
-  options {
-    buildDiscarder(logRotator(numToKeepStr: '5'))
+  agent { 
+    label 'macos'
   }
   stages {
     stage('Tooling versions') {
@@ -9,6 +8,7 @@ pipeline {
         sh '''
           docker --version
           docker compose version
+          echo success
         '''
       }
     }
